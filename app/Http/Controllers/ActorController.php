@@ -53,7 +53,7 @@ class ActorController extends Controller
                 $attachment->file_path = url('storage/' . $attachment->file_path);
             }
 
-            $actor->social_media = json_decode($actor->social_media, true);
+            $actor->social_media = json_decode($actor->social_media, true)?? [];
         }
 
         return response()->json([
@@ -88,7 +88,7 @@ class ActorController extends Controller
             $attachment->file_path = url('storage/' . $attachment->file_path);
         }
 
-        $actor->social_media = json_decode($actor->social_media, true);
+        $actor->social_media = json_decode($actor->social_media, true)?? [];
 
         return response()->json([
             'success' => true,
@@ -150,7 +150,7 @@ class ActorController extends Controller
             $actor->attachments[$i]->file_path = url('storage/' . $actor->attachments[$i]->file_path);
         }
 
-        $actor->social_media = json_decode($actor->social_media, true);
+        $actor->social_media = json_decode($actor->social_media, true)?? [];
 
         return response()->json([
             'success' => true,
@@ -225,7 +225,7 @@ class ActorController extends Controller
             $actor->attachments[$i]->file_path = url('storage/' . $actor->attachments[$i]->file_path);
         }
 
-        $actor->social_media = json_decode($actor->social_media, true);
+        $actor->social_media = json_decode($actor->social_media, true)?? [];
 
         return response()->json([
             'success' => true,
