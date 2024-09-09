@@ -27,6 +27,10 @@ class ActorController extends Controller
             });
         }
 
+        if ($request->filled('gender')) {
+            $query->where('gender', $request->gender);
+        }
+
         if ($request->filled('age_min')) {
             $minDate = now()->subYears($request->age_min)->format('Y-m-d');
             $query->where('birthdate', '<=', $minDate);
