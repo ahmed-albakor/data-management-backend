@@ -15,7 +15,7 @@ class ActorController extends Controller
 
     public function index(Request $request)
     {
-        $query = Actor::with(['attachments', 'socialMediaPlatforms']);
+        $query = Actor::with(['attachments']);
 
         $availableTextFields = ['name', 'address', 'notes', 'phone', 'email'];
 
@@ -40,17 +40,10 @@ class ActorController extends Controller
             $query->where('birthdate', '>=', $maxDate);
         }
 
-        if ($request->filled('social_media_platform')) {
-            $query->whereHas('socialMediaPlatforms', function ($q) use ($request) {
-                $q->where('name', $request->social_media_platform);
-            });
-        }
-
         $limit = $request->input('limit', 25);
         $limit = max(5, min($limit, 250));
 
         $actors = $query->paginate($limit);
-
 
         foreach ($actors as $actor) {
             if ($actor->profile_picture) {
@@ -59,8 +52,9 @@ class ActorController extends Controller
             foreach ($actor->attachments as $attachment) {
                 $attachment->file_path = url('storage/' . $attachment->file_path);
             }
-        }
 
+            $actor->social_media = json_decode($actor->social_media, true);
+        }
 
         return response()->json([
             'success' => true,
@@ -77,7 +71,7 @@ class ActorController extends Controller
 
     public function show($id)
     {
-        $actor = Actor::with(['attachments', 'socialMediaPlatforms'])->find($id);
+        $actor = Actor::with(['attachments'])->find($id);
 
         if (!$actor) {
             return response()->json([
@@ -85,7 +79,6 @@ class ActorController extends Controller
                 'message' => 'الممثل غير موجود',
             ], 404);
         }
-
 
         if ($actor->profile_picture) {
             $actor->profile_picture = url('storage/' . $actor->profile_picture);
@@ -95,11 +88,14 @@ class ActorController extends Controller
             $attachment->file_path = url('storage/' . $attachment->file_path);
         }
 
+        $actor->social_media = json_decode($actor->social_media, true);
+
         return response()->json([
             'success' => true,
             'data' => $actor,
         ], 200);
     }
+
     public function create(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -114,8 +110,6 @@ class ActorController extends Controller
             'attachments' => 'nullable|array',
             'attachments.*' => 'nullable|file|mimetypes:image/jpeg,image/png,video/mp4,video/mpeg',
             'social_media' => 'nullable|array',
-            'social_media.*.platform_id' => 'required|exists:social_media_platforms,id',
-            'social_media.*.link' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -130,8 +124,12 @@ class ActorController extends Controller
             $profilePicture = ImageService::storeImage($request->file('profile_picture'), 'profile_pictures');
         }
 
+        // تشفير social_media JSON
+        $socialMediaJson = json_encode($request->social_media);
+
         $actor = Actor::create(array_merge($request->only('name', 'email', 'phone', 'birthdate', 'gender', 'address', 'notes'), [
-            'profile_picture' => $profilePicture
+            'profile_picture' => $profilePicture,
+            'social_media' => $socialMediaJson,
         ]));
 
         if ($request->has('attachments')) {
@@ -146,24 +144,21 @@ class ActorController extends Controller
             }
         }
 
-        if ($request->has('social_media')) {
-            foreach ($request->social_media as $platform) {
-                $actor->socialMediaPlatforms()->attach($platform['platform_id'], ['link' => $platform['link']]);
-            }
-        }
-
         $actor->profile_picture = $actor->profile_picture ? url('storage/' . $actor->profile_picture) : null;
 
         for ($i = 0; $i < count($actor->attachments); $i++) {
-            $actor->attachments[$i]->file_path = url('storage/' .  $actor->attachments[$i]->file_path);
+            $actor->attachments[$i]->file_path = url('storage/' . $actor->attachments[$i]->file_path);
         }
+
+        $actor->social_media = json_decode($actor->social_media, true);
 
         return response()->json([
             'success' => true,
             'message' => 'تم إضافة الممثل بنجاح',
-            'data' => $actor->load('socialMediaPlatforms'),
+            'data' => $actor,
         ], 201);
     }
+
 
     public function update(Request $request, $id)
     {
@@ -188,8 +183,6 @@ class ActorController extends Controller
             'attachments' => 'nullable|array',
             'attachments.*' => 'nullable|file|mimetypes:image/jpeg,image/png,video/mp4,video/mpeg',
             'social_media' => 'nullable|array',
-            'social_media.*.platform_id' => 'required|exists:social_media_platforms,id',
-            'social_media.*.link' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -208,7 +201,11 @@ class ActorController extends Controller
             $actor->profile_picture = $profilePicture;
         }
 
-        $actor->update($request->only('name', 'email', 'phone', 'birthdate', 'gender', 'address', 'notes'));
+        $socialMediaJson = json_encode($request->social_media);
+
+        $actor->update(array_merge($request->only('name', 'email', 'phone', 'birthdate', 'gender', 'address', 'notes'), [
+            'social_media' => $socialMediaJson,
+        ]));
 
         if ($request->has('attachments')) {
             foreach ($request->attachments as $attachment) {
@@ -222,25 +219,21 @@ class ActorController extends Controller
             }
         }
 
-        if ($request->has('social_media')) {
-            $actor->socialMediaPlatforms()->detach();
-            foreach ($request->social_media as $platform) {
-                $actor->socialMediaPlatforms()->attach($platform['platform_id'], ['link' => $platform['link']]);
-            }
-        }
-
         $actor->profile_picture = $actor->profile_picture ? url('storage/' . $actor->profile_picture) : null;
 
         for ($i = 0; $i < count($actor->attachments); $i++) {
-            $actor->attachments[$i]->file_path = url('storage/' .  $actor->attachments[$i]->file_path);
+            $actor->attachments[$i]->file_path = url('storage/' . $actor->attachments[$i]->file_path);
         }
+
+        $actor->social_media = json_decode($actor->social_media, true);
 
         return response()->json([
             'success' => true,
             'message' => 'تم تعديل بيانات الممثل بنجاح',
-            'data' => $actor->load('socialMediaPlatforms'),
+            'data' => $actor,
         ], 200);
     }
+
 
 
 

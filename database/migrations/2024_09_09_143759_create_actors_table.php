@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('gender');
             $table->string('address')->nullable();
             $table->text('notes')->nullable();
+            $table->json('social_media')->nullable();
             $table->timestamps();
         });
     }
