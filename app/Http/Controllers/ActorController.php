@@ -17,7 +17,7 @@ class ActorController extends Controller
     {
         $query = Actor::with(['attachments', 'socialMediaPlatforms']);
 
-        $availableTextFields = ['name', 'address', 'notes', 'phone'];
+        $availableTextFields = ['name', 'address', 'notes', 'phone', 'email'];
 
         if ($request->filled('text')) {
             $query->where(function ($q) use ($request, $availableTextFields) {
