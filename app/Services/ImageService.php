@@ -38,33 +38,7 @@ class ImageService
     }
 
     /**
-     * تحويل الصورة إلى WebP باستخدام GD Library
-     *
-     * @param  mixed  $image
-     * @param  string  $newPath
-     * @return void
-     */
-    private static function convertToWebP($image, $newPath)
-    {
-        // التحقق من نوع الصورة (JPEG/PNG) واستخدام GD Library لتحويلها إلى WebP
-        $imageInfo = getimagesize($image->getPathname());
-        $mimeType = $imageInfo['mime'];
-
-        if ($mimeType == 'image/jpeg') {
-            $source = imagecreatefromjpeg($image->getPathname());
-        } elseif ($mimeType == 'image/png') {
-            $source = imagecreatefrompng($image->getPathname());
-        } else {
-            throw new \Exception("Unsupported image type");
-        }
-
-        // تحويل الصورة إلى WebP وحفظها في المسار المحدد
-        imagewebp($source, $newPath, 90); // جودة الصورة 90%
-        imagedestroy($source);
-    }
-
-    /**
-     * تخزين الصورة في المسار المحدد وتحويلها إلى WebP وتحسينها
+     * تخزين الصورة في المسار المحدد وتحسينها
      *
      * @param  mixed  $image
      * @param  string  $folder
@@ -75,14 +49,14 @@ class ImageService
         // إنشاء المجلد إن لم يكن موجودًا
         self::makeFolder($folder);
 
-        // إنشاء اسم جديد للصورة مع استخدام امتداد WebP
-        $imageName = time() . '.webp';
+        // الحصول على امتداد الصورة وإنشاء اسم جديد باستخدام الوقت الحالي
+        $imageName = time() . '.' . $image->getClientOriginalExtension();
 
         // تحديد المسار الجديد للصورة
         $newPath = storage_path(sprintf('app/public/%s/%s', $folder, $imageName));
 
-        // تحويل الصورة إلى WebP وتخزينها
-        self::convertToWebP($image, $newPath);
+        // نقل الصورة إلى المسار الجديد
+        move_uploaded_file($image->getPathname(), $newPath);
 
         // تحسين الصورة باستخدام Spatie Image Optimizer
         self::optimizeImage($newPath);
