@@ -5,7 +5,6 @@ namespace App\Services;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Spatie\ImageOptimizer\OptimizerChainFactory;
-use Intervention\Image\Facades\Image;
 
 class ImageService
 {
@@ -39,7 +38,7 @@ class ImageService
     }
 
     /**
-     * تحويل الصورة إلى WebP
+     * تحويل الصورة إلى WebP باستخدام GD Library
      *
      * @param  mixed  $image
      * @param  string  $newPath
@@ -47,10 +46,21 @@ class ImageService
      */
     private static function convertToWebP($image, $newPath)
     {
-        // تحويل الصورة إلى WebP باستخدام Intervention Image
-        $img = Image::make($image->getPathname());
-        $img->encode('webp', 90); // جودة الصورة (90%)
-        $img->save($newPath);
+        // التحقق من نوع الصورة (JPEG/PNG) واستخدام GD Library لتحويلها إلى WebP
+        $imageInfo = getimagesize($image->getPathname());
+        $mimeType = $imageInfo['mime'];
+
+        if ($mimeType == 'image/jpeg') {
+            $source = imagecreatefromjpeg($image->getPathname());
+        } elseif ($mimeType == 'image/png') {
+            $source = imagecreatefrompng($image->getPathname());
+        } else {
+            throw new \Exception("Unsupported image type");
+        }
+
+        // تحويل الصورة إلى WebP وحفظها في المسار المحدد
+        imagewebp($source, $newPath, 90); // جودة الصورة 90%
+        imagedestroy($source);
     }
 
     /**
