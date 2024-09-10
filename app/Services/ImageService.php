@@ -5,6 +5,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Spatie\ImageOptimizer\OptimizerChainFactory;
+use Intervention\Image\Facades\Image;
 
 class ImageService
 {
@@ -38,7 +39,22 @@ class ImageService
     }
 
     /**
-     * تخزين الصورة في المسار المحدد وتحسينها
+     * تحويل الصورة إلى WebP
+     *
+     * @param  mixed  $image
+     * @param  string  $newPath
+     * @return void
+     */
+    private static function convertToWebP($image, $newPath)
+    {
+        // تحويل الصورة إلى WebP باستخدام Intervention Image
+        $img = Image::make($image->getPathname());
+        $img->encode('webp', 90); // جودة الصورة (90%)
+        $img->save($newPath);
+    }
+
+    /**
+     * تخزين الصورة في المسار المحدد وتحويلها إلى WebP وتحسينها
      *
      * @param  mixed  $image
      * @param  string  $folder
@@ -49,14 +65,14 @@ class ImageService
         // إنشاء المجلد إن لم يكن موجودًا
         self::makeFolder($folder);
 
-        // الحصول على امتداد الصورة وإنشاء اسم جديد باستخدام الوقت الحالي
-        $imageName = time() . '.' . $image->getClientOriginalExtension();
+        // إنشاء اسم جديد للصورة مع استخدام امتداد WebP
+        $imageName = time() . '.webp';
 
         // تحديد المسار الجديد للصورة
         $newPath = storage_path(sprintf('app/public/%s/%s', $folder, $imageName));
 
-        // نقل الصورة إلى المسار الجديد
-        move_uploaded_file($image->getPathname(), $newPath);
+        // تحويل الصورة إلى WebP وتخزينها
+        self::convertToWebP($image, $newPath);
 
         // تحسين الصورة باستخدام Spatie Image Optimizer
         self::optimizeImage($newPath);
