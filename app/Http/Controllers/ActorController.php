@@ -111,7 +111,7 @@ class ActorController extends Controller
             'attachments.*' => 'nullable|file|mimetypes:image/jpeg,image/png,video/mp4,video/mpeg',
             'social_media' => 'nullable|array',
             'social_media.*.name' => 'required|string|max:255',
-            'social_media.*.link' => 'required|string|url',
+            'social_media.*.link' => 'required|string', // |url
         ]);
 
         if ($validator->fails()) {
@@ -126,13 +126,17 @@ class ActorController extends Controller
             $profilePicture = ImageService::storeImage($request->file('profile_picture'), 'profile_pictures');
         }
 
-        // تشفير social_media JSON
         $socialMediaJson = json_encode($request->social_media);
 
-        $actor = Actor::create(array_merge($request->only('name', 'email', 'phone', 'birthdate', 'gender', 'address', 'notes'), [
-            'profile_picture' => $profilePicture,
-            'social_media' => $socialMediaJson,
-        ]));
+        $actor = Actor::create(
+            array_merge(
+                $request->only('name', 'email', 'phone', 'birthdate', 'gender', 'address', 'notes'),
+                [
+                    'profile_picture' => $profilePicture,
+                    'social_media' => $socialMediaJson,
+                ],
+            ),
+        );
 
         if ($request->has('attachments')) {
             foreach ($request->attachments as $attachment) {

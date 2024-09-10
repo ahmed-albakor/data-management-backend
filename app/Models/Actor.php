@@ -10,7 +10,7 @@ class Actor extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'email', 'phone', 'profile_picture', 'birthdate', 'gender', 'address', 'notes'];
+    protected $fillable = ['name', 'email', 'phone', 'profile_picture', 'birthdate', 'gender', 'address', 'notes','social_media'];
 
     public function socialMediaPlatforms()
     {
