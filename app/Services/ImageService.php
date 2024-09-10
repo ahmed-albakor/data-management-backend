@@ -2,73 +2,85 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image;
+use Spatie\ImageOptimizer\OptimizerChainFactory;
 
 class ImageService
 {
     /**
-     * تخزين الصورة بعد ضغطها وتقليل حجمها
+     * إنشاء المجلد إذا لم يكن موجودًا
      *
-     * @param  mixed  $file
-     * @param  string $path
-     * @param  int    $width
-     * @param  int    $quality
-     * @return string
+     * @param  string  $folderName
+     * @return void
      */
-    public static function storeImage($file, $path, $width = 1000, $quality = 80)
+    private static function makeFolder($folderName)
     {
-        // إنشاء مسار الصورة
-        $imageName = time() . '.' . $file->getClientOriginalExtension();
+        // تحديد مسار المجلد
+        $pathFolder = storage_path(sprintf('app/public/%s', $folderName));
 
-        // تحميل الصورة واستخدام Intervention Image لضغطها وتغيير حجمها
-        $image = Image::make($file)
-            ->resize($width, null, function ($constraint) {
-                $constraint->aspectRatio(); // الحفاظ على نسبة العرض إلى الارتفاع
-                $constraint->upsize(); // عدم تكبير الصورة أكثر من اللازم
-            })
-            ->encode($file->getClientOriginalExtension(), $quality); // ضبط الجودة
-
-        // تخزين الصورة في الـ Storage
-        Storage::put($path . '/' . $imageName, (string) $image);
-
-        return $imageName;
+        // التحقق من وجود المجلد، وإنشاءه إذا لم يكن موجودًا
+        if (!File::isDirectory($pathFolder)) {
+            File::makeDirectory($pathFolder, 0755, true);
+        }
     }
 
     /**
-     * تحديث الصورة الموجودة (حذف القديمة وحفظ الجديدة)
+     * تحسين الصورة باستخدام Spatie Image Optimizer
      *
-     * @param  mixed  $file
-     * @param  string $path
-     * @param  string $oldImage
-     * @param  int    $width
-     * @param  int    $quality
+     * @param  string  $imagePath
+     * @return void
+     */
+    private static function optimizeImage($imagePath)
+    {
+        $optimizerChain = OptimizerChainFactory::create();
+        $optimizerChain->optimize($imagePath);
+    }
+
+    /**
+     * تخزين الصورة في المسار المحدد وتحسينها
+     *
+     * @param  mixed  $image
+     * @param  string  $folder
      * @return string
      */
-    public static function updateImage($file, $path, $oldImage = null, $width = 1000, $quality = 80)
+    public static function storeImage($image, $folder)
+    {
+        // إنشاء المجلد إن لم يكن موجودًا
+        self::makeFolder($folder);
+
+        // الحصول على امتداد الصورة وإنشاء اسم جديد باستخدام الوقت الحالي
+        $imageName = time() . '.' . $image->getClientOriginalExtension();
+
+        // تحديد المسار الجديد للصورة
+        $newPath = storage_path(sprintf('app/public/%s/%s', $folder, $imageName));
+
+        // نقل الصورة إلى المسار الجديد
+        move_uploaded_file($image->getPathname(), $newPath);
+
+        // تحسين الصورة باستخدام Spatie Image Optimizer
+        self::optimizeImage($newPath);
+
+        // إرجاع المسار النسبي للصورة
+        return sprintf('%s/%s', $folder, $imageName);
+    }
+
+    /**
+     * تحديث الصورة عن طريق حذف الصورة القديمة وتخزين الجديدة وتحسينها
+     *
+     * @param  mixed  $image
+     * @param  string  $folder
+     * @param  string|null  $oldImageName
+     * @return string|null
+     */
+    public static function updateImage($image, $folder, $oldImageName) : ?string
     {
         // حذف الصورة القديمة إذا كانت موجودة
-        if ($oldImage) {
-            ImageService::deleteImage($path, $oldImage);
+        if ($oldImageName && Storage::exists("public/" . $oldImageName)) {
+            Storage::delete("public/" . $oldImageName);
         }
 
-        // حفظ الصورة الجديدة
-        return  ImageService::storeImage($file, $path, $width, $quality);
-    }
-
-    /**
-     * حذف الصورة من التخزين
-     *
-     * @param  string  $path
-     * @param  string  $imageName
-     * @return bool
-     */
-    public static function deleteImage($path, $imageName)
-    {
-        if (Storage::exists($path . '/' . $imageName)) {
-            return Storage::delete($path . '/' . $imageName);
-        }
-
-        return false;
+        // تخزين وتحسين الصورة الجديدة
+        return self::storeImage($image, $folder);
     }
 }
