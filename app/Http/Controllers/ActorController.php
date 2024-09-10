@@ -191,7 +191,7 @@ class ActorController extends Controller
             'social_media' => 'nullable|array',
             'social_media' => 'nullable|array',
             'social_media.*.name' => 'required|string|max:255',
-            'social_media.*.link' => 'required|string|url',
+            'social_media.*.link' => 'required|string',
 
         ]);
 
