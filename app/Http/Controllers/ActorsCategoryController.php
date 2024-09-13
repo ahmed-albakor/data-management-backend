@@ -8,10 +8,8 @@ use Illuminate\Support\Facades\Validator;
 
 class ActorsCategoryController extends Controller
 {
-    // عرض كل الفئات
     public function index(Request $request)
     {
-        // جلب جميع الفئات بدون تقسيم
         $categories = ActorsCategory::all();
 
         return response()->json([
@@ -20,7 +18,6 @@ class ActorsCategoryController extends Controller
         ], 200);
     }
 
-    // عرض فئة معينة
     public function show($id)
     {
         $category = ActorsCategory::find($id);
