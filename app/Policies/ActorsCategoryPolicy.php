@@ -2,11 +2,11 @@
 
 namespace App\Policies;
 
-use App\Models\SocialMediaPlatform;
+use App\Models\ActorsCategory;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
-class SocialMediaPlatformPolicy
+class ActorsCategoryPolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -19,7 +19,7 @@ class SocialMediaPlatformPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, SocialMediaPlatform $socialMediaPlatform): bool
+    public function view(User $user, ActorsCategory $actorsCategory): bool
     {
         //
     }
@@ -35,7 +35,7 @@ class SocialMediaPlatformPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, SocialMediaPlatform $socialMediaPlatform): bool
+    public function update(User $user, ActorsCategory $actorsCategory): bool
     {
         //
     }
@@ -43,7 +43,7 @@ class SocialMediaPlatformPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, SocialMediaPlatform $socialMediaPlatform): bool
+    public function delete(User $user, ActorsCategory $actorsCategory): bool
     {
         //
     }
@@ -51,7 +51,7 @@ class SocialMediaPlatformPolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, SocialMediaPlatform $socialMediaPlatform): bool
+    public function restore(User $user, ActorsCategory $actorsCategory): bool
     {
         //
     }
@@ -59,7 +59,7 @@ class SocialMediaPlatformPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, SocialMediaPlatform $socialMediaPlatform): bool
+    public function forceDelete(User $user, ActorsCategory $actorsCategory): bool
     {
         //
     }

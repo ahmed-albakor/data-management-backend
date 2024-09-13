@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('profile_picture')->nullable();
             $table->date('birthdate');
             $table->string('gender');
-            $table->string('address')->nullable();
+            $table->string('expected_price')->nullable();
             $table->text('notes')->nullable();
             $table->json('social_media')->nullable();
             $table->timestamps();

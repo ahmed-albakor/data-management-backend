@@ -10,14 +10,8 @@ class Actor extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'email', 'phone', 'profile_picture', 'birthdate', 'gender', 'address', 'notes','social_media'];
+    protected $fillable = ['name', 'email', 'phone', 'profile_picture', 'birthdate', 'gender', 'expected_price', 'notes','social_media'];
 
-    public function socialMediaPlatforms()
-    {
-        return $this->belongsToMany(SocialMediaPlatform::class, 'actor_social_media')
-            ->withPivot('link')
-            ->withTimestamps();
-    }
 
     public function getAgeAttribute()
     {

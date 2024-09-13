@@ -17,7 +17,7 @@ class ActorController extends Controller
     {
         $query = Actor::with(['attachments']);
 
-        $availableTextFields = ['name', 'address', 'notes', 'phone', 'email'];
+        $availableTextFields = ['name', 'expected_price', 'notes', 'phone', 'email'];
 
         if ($request->filled('text')) {
             $query->where(function ($q) use ($request, $availableTextFields) {
@@ -104,7 +104,7 @@ class ActorController extends Controller
             'phone' => 'nullable|string|max:25',
             'birthdate' => 'required|date',
             'gender' => 'required|string',
-            'address' => 'nullable|string',
+            'expected_price' => 'nullable|string',
             'notes' => 'nullable|string',
             'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'attachments' => 'nullable|array',
@@ -130,7 +130,7 @@ class ActorController extends Controller
 
         $actor = Actor::create(
             array_merge(
-                $request->only('name', 'email', 'phone', 'birthdate', 'gender', 'address', 'notes'),
+                $request->only('name', 'email', 'phone', 'birthdate', 'gender', 'expected_price', 'notes'),
                 [
                     'profile_picture' => $profilePicture,
                     'social_media' => $socialMediaJson,
@@ -183,7 +183,7 @@ class ActorController extends Controller
             'phone' => 'nullable|string|max:25',
             'birthdate' => 'nullable|date',
             'gender' => 'nullable|string',
-            'address' => 'nullable|string',
+            'expected_price' => 'nullable|string',
             'notes' => 'nullable|string',
             'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'attachments' => 'nullable|array',
@@ -213,7 +213,7 @@ class ActorController extends Controller
 
         $socialMediaJson = json_encode($request->social_media);
 
-        $actor->update(array_merge($request->only('name', 'email', 'phone', 'birthdate', 'gender', 'address', 'notes'), [
+        $actor->update(array_merge($request->only('name', 'email', 'phone', 'birthdate', 'gender', 'expected_price', 'notes'), [
             'social_media' => $socialMediaJson,
         ]));
 

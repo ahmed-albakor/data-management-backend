@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SocialMediaPlatform;
-use App\Http\Requests\StoreSocialMediaPlatformRequest;
-use App\Http\Requests\UpdateSocialMediaPlatformRequest;
+use App\Models\ActorsCategory;
+use App\Http\Requests\StoreActorsCategoryRequest;
+use App\Http\Requests\UpdateActorsCategoryRequest;
 
-class SocialMediaPlatformController extends Controller
+class ActorsCategoryController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -27,7 +27,7 @@ class SocialMediaPlatformController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreSocialMediaPlatformRequest $request)
+    public function store(StoreActorsCategoryRequest $request)
     {
         //
     }
@@ -35,7 +35,7 @@ class SocialMediaPlatformController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(SocialMediaPlatform $socialMediaPlatform)
+    public function show(ActorsCategory $actorsCategory)
     {
         //
     }
@@ -43,7 +43,7 @@ class SocialMediaPlatformController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(SocialMediaPlatform $socialMediaPlatform)
+    public function edit(ActorsCategory $actorsCategory)
     {
         //
     }
@@ -51,7 +51,7 @@ class SocialMediaPlatformController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateSocialMediaPlatformRequest $request, SocialMediaPlatform $socialMediaPlatform)
+    public function update(UpdateActorsCategoryRequest $request, ActorsCategory $actorsCategory)
     {
         //
     }
@@ -59,7 +59,7 @@ class SocialMediaPlatformController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(SocialMediaPlatform $socialMediaPlatform)
+    public function destroy(ActorsCategory $actorsCategory)
     {
         //
     }

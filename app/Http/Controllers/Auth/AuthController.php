@@ -16,7 +16,6 @@ class AuthController extends Controller
             'first_name' => 'required|string',
             'last_name' => 'required|string',
             'phone' => 'required|string',
-            'address' => 'nullable|string',
             'email' => 'required|string|email|unique:users',
             'password' => 'required|string|min:6',
             'role_id' => 'nullable|integer'
@@ -42,11 +41,6 @@ class AuthController extends Controller
             'password' => Hash::make($registerUserData['password']),
             'role_id' => $role_id,
         ];
-
-        $address = $request->input('address');
-        if (!empty($address)) {
-            $create_user_data['address'] = $address;
-        }
 
         $user = User::create($create_user_data);
         return response()->json([
