@@ -3,64 +3,115 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActorsCategory;
-use App\Http\Requests\StoreActorsCategoryRequest;
-use App\Http\Requests\UpdateActorsCategoryRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class ActorsCategoryController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    // عرض كل الفئات
+    public function index(Request $request)
     {
-        //
+        // جلب جميع الفئات بدون تقسيم
+        $categories = ActorsCategory::all();
+
+        return response()->json([
+            'success' => true,
+            'data' => $categories,
+        ], 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    // عرض فئة معينة
+    public function show($id)
     {
-        //
+        $category = ActorsCategory::find($id);
+
+        if (!$category) {
+            return response()->json([
+                'success' => false,
+                'message' => 'الفئة غير موجودة',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $category,
+        ], 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreActorsCategoryRequest $request)
+    // إنشاء فئة جديدة
+    public function create(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $category = ActorsCategory::create($request->only('name', 'description'));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم إضافة الفئة بنجاح',
+            'data' => $category,
+        ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(ActorsCategory $actorsCategory)
+    // تعديل فئة
+    public function update(Request $request, $id)
     {
-        //
+        $category = ActorsCategory::find($id);
+
+        if (!$category) {
+            return response()->json([
+                'success' => false,
+                'message' => 'الفئة غير موجودة',
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $category->update($request->only('name', 'description'));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم تعديل الفئة بنجاح',
+            'data' => $category,
+        ], 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(ActorsCategory $actorsCategory)
+    // حذف فئة
+    public function destroy($id)
     {
-        //
-    }
+        $category = ActorsCategory::find($id);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateActorsCategoryRequest $request, ActorsCategory $actorsCategory)
-    {
-        //
-    }
+        if (!$category) {
+            return response()->json([
+                'success' => false,
+                'message' => 'الفئة غير موجودة',
+            ], 404);
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(ActorsCategory $actorsCategory)
-    {
-        //
+        $category->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم حذف الفئة بنجاح',
+        ], 200);
     }
 }

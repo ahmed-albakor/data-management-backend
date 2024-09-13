@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('expected_price')->nullable();
             $table->text('notes')->nullable();
             $table->json('social_media')->nullable();
+            $table->string('categories_ids');
             $table->timestamps();
         });
     }

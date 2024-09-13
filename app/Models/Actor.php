@@ -10,7 +10,7 @@ class Actor extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'email', 'phone', 'profile_picture', 'birthdate', 'gender', 'expected_price', 'notes','social_media'];
+    protected $fillable = ['name', 'email', 'phone', 'profile_picture', 'birthdate', 'gender', 'expected_price', 'notes','social_media','categories_ids'];
 
 
     public function getAgeAttribute()

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Actor;
+use App\Models\ActorsCategory;
 use App\Models\Attachment;
 use App\Services\ImageService;
 use Illuminate\Http\Request;
@@ -69,6 +70,79 @@ class ActorController extends Controller
     }
 
 
+    public function indexByCategories(Request $request)
+    {
+        $categories = ActorsCategory::all();
+
+        $result = [];
+
+        foreach ($categories as $category) {
+            $query = Actor::with(['attachments'])
+                ->whereRaw("FIND_IN_SET(?, categories_ids)", [$category->id]);
+
+            $availableTextFields = ['name', 'expected_price', 'notes', 'phone', 'email'];
+
+            if ($request->filled('text')) {
+                $query->where(function ($q) use ($request, $availableTextFields) {
+                    foreach ($availableTextFields as $field) {
+                        $q->orWhere($field, 'like', '%' . $request->text . '%');
+                    }
+                });
+            }
+
+            if ($request->filled('gender')) {
+                $query->where('gender', $request->gender);
+            }
+
+            if ($request->filled('age_min')) {
+                $minDate = now()->subYears($request->age_min)->format('Y-m-d');
+                $query->where('birthdate', '<=', $minDate);
+            }
+            if ($request->filled('age_max')) {
+                $maxDate = now()->subYears($request->age_max)->format('Y-m-d');
+                $query->where('birthdate', '>=', $maxDate);
+            }
+
+            $limit = $request->input('limit', 25);
+            $limit = max(5, min($limit, 250));
+
+            $actors = $query->paginate($limit);
+
+            foreach ($actors as $actor) {
+                if ($actor->profile_picture) {
+                    $actor->profile_picture = url('storage/' . $actor->profile_picture);
+                }
+                foreach ($actor->attachments as $attachment) {
+                    $attachment->file_path = url('storage/' . $attachment->file_path);
+                }
+
+                $actor->social_media = json_decode($actor->social_media, true) ?? [];
+            }
+
+            $result[] = [
+                'category' => [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'description' => $category->description,
+                    'data' => $actors->items(),
+                ],
+                'meta' => [
+                    'page' => $actors->currentPage(),
+                    'limit' => $actors->perPage(),
+                    'total' => $actors->total(),
+                    'last_page' => $actors->lastPage(),
+                ],
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'categories' => $result,
+        ], 200);
+    }
+
+
+
     public function show($id)
     {
         $actor = Actor::with(['attachments'])->find($id);
@@ -104,6 +178,7 @@ class ActorController extends Controller
             'phone' => 'nullable|string|max:25',
             'birthdate' => 'required|date',
             'gender' => 'required|string',
+            'categories_ids' => 'required|string',
             'expected_price' => 'nullable|string',
             'notes' => 'nullable|string',
             'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif',
@@ -183,6 +258,7 @@ class ActorController extends Controller
             'phone' => 'nullable|string|max:25',
             'birthdate' => 'nullable|date',
             'gender' => 'nullable|string',
+            'categories_ids' => 'nullable|string',
             'expected_price' => 'nullable|string',
             'notes' => 'nullable|string',
             'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif',
@@ -213,7 +289,7 @@ class ActorController extends Controller
 
         $socialMediaJson = json_encode($request->social_media);
 
-        $actor->update(array_merge($request->only('name', 'email', 'phone', 'birthdate', 'gender', 'expected_price', 'notes'), [
+        $actor->update(array_merge($request->only('name', 'email', 'phone', 'birthdate', 'gender', 'expected_price', 'notes', 'categories_ids'), [
             'social_media' => $socialMediaJson,
         ]));
 
