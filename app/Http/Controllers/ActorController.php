@@ -173,7 +173,6 @@ class ActorController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:actors',
             'phone' => 'nullable|string|max:25',
             'birthdate' => 'required|date',
             'gender' => 'required|string',
@@ -184,14 +183,21 @@ class ActorController extends Controller
             'attachments' => 'nullable|array',
             'attachments.*' => 'nullable|file|mimetypes:image/jpeg,image/png,video/mp4,video/mpeg',
             'social_media' => 'nullable|array',
-            'social_media.*.name' => 'required|string|max:255',
-            'social_media.*.link' => 'required|string', // |url
+            'social_media.*.name' => 'nullable|string|max:255',
+            'social_media.*.link' => 'nullable|string', // |url
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        if (Actor::where('email', $request->email)->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'البريد الإلكتروني مستخدم من قبل.',
             ], 422);
         }
 
@@ -208,12 +214,12 @@ class ActorController extends Controller
                 [
                     'profile_picture' => $profilePicture,
                     'social_media' => $socialMediaJson,
-                ],
-            ),
+                ]
+            )
         );
 
         if ($request->has('attachments')) {
-            foreach ($request->attachments as $attachment) {
+            foreach ($request->file('attachments') as $attachment) {
                 $type = $attachment->getMimeType();
                 $storedAttachment = ImageService::storeImage($attachment, $type === 'video/mp4' ? 'videos' : 'images');
                 Attachment::create([
@@ -226,8 +232,10 @@ class ActorController extends Controller
 
         $actor->profile_picture = $actor->profile_picture ? url('storage/' . $actor->profile_picture) : null;
 
-        for ($i = 0; $i < count($actor->attachments); $i++) {
-            $actor->attachments[$i]->file_path = url('storage/' . $actor->attachments[$i]->file_path);
+        if (!empty($actor->attachments)) {
+            for ($i = 0; $i < count($actor->attachments); $i++) {
+                $actor->attachments[$i]->file_path = url('storage/' . $actor->attachments[$i]->file_path);
+            }
         }
 
         $actor->social_media = json_decode($actor->social_media, true) ?? [];
@@ -238,7 +246,6 @@ class ActorController extends Controller
             'data' => $actor,
         ], 201);
     }
-
 
     public function update(Request $request, $id)
     {
@@ -253,7 +260,6 @@ class ActorController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'nullable|string|max:255',
-            'email' => 'nullable|email|unique:actors,email,' . $id,
             'phone' => 'nullable|string|max:25',
             'birthdate' => 'nullable|date',
             'gender' => 'nullable|string',
@@ -264,16 +270,21 @@ class ActorController extends Controller
             'attachments' => 'nullable|array',
             'attachments.*' => 'nullable|file|mimetypes:image/jpeg,image/png,video/mp4,video/mpeg',
             'social_media' => 'nullable|array',
-            'social_media' => 'nullable|array',
-            'social_media.*.name' => 'required|string|max:255',
-            'social_media.*.link' => 'required|string',
-
+            'social_media.*.name' => 'nullable|string|max:255',
+            'social_media.*.link' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        if ($request->email && $request->email !== $actor->email && Actor::where('email', $request->email)->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'البريد الإلكتروني مستخدم من قبل.',
             ], 422);
         }
 
@@ -293,7 +304,7 @@ class ActorController extends Controller
         ]));
 
         if ($request->has('attachments')) {
-            foreach ($request->attachments as $attachment) {
+            foreach ($request->file('attachments') as $attachment) {
                 $type = $attachment->getMimeType();
                 $storedAttachment = ImageService::storeImage($attachment, $type === 'video/mp4' ? 'videos' : 'images');
                 Attachment::create([
@@ -306,8 +317,10 @@ class ActorController extends Controller
 
         $actor->profile_picture = $actor->profile_picture ? url('storage/' . $actor->profile_picture) : null;
 
-        for ($i = 0; $i < count($actor->attachments); $i++) {
-            $actor->attachments[$i]->file_path = url('storage/' . $actor->attachments[$i]->file_path);
+        if (!empty($actor->attachments)) {
+            for ($i = 0; $i < count($actor->attachments); $i++) {
+                $actor->attachments[$i]->file_path = url('storage/' . $actor->attachments[$i]->file_path);
+            }
         }
 
         $actor->social_media = json_decode($actor->social_media, true) ?? [];
