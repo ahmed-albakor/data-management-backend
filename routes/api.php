@@ -34,5 +34,5 @@ Route::prefix('actors')->group(function () {
 Route::get('/categories', [ActorsCategoryController::class, 'index']);
 Route::get('/categories/{id}', [ActorsCategoryController::class, 'show']);
 Route::post('/categories', [ActorsCategoryController::class, 'create']);
-Route::put('/categories/{id}', [ActorsCategoryController::class, 'update']);
+Route::post('/categories/{id}', [ActorsCategoryController::class, 'update']);
 Route::delete('/categories/{id}', [ActorsCategoryController::class, 'destroy']);

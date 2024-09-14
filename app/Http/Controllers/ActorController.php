@@ -104,7 +104,7 @@ class ActorController extends Controller
             }
 
             $limit = $request->input('limit', 25);
-            $limit = max(5, min($limit, 250));
+            $limit = max(5, min($limit, 99999999999999999999999));
 
             $actors = $query->paginate($limit);
 
