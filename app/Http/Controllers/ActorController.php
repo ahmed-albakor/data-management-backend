@@ -173,6 +173,7 @@ class ActorController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
+            'email' => 'required|string|max:255',
             'phone' => 'nullable|string|max:25',
             'birthdate' => 'required|date',
             'gender' => 'required|string',
@@ -210,7 +211,7 @@ class ActorController extends Controller
 
         $actor = Actor::create(
             array_merge(
-                $request->only('name', 'email', 'phone', 'birthdate', 'gender', 'expected_price', 'notes'),
+                $request->only('name', 'email', 'phone', 'birthdate', 'gender', 'expected_price', 'notes','categories_ids'),
                 [
                     'profile_picture' => $profilePicture,
                     'social_media' => $socialMediaJson,
