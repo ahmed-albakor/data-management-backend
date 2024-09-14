@@ -120,24 +120,23 @@ class ActorController extends Controller
             }
 
             $result[] = [
-                'category' => [
-                    'id' => $category->id,
-                    'name' => $category->name,
-                    'description' => $category->description,
-                    'data' => $actors->items(),
-                ],
-                'meta' => [
-                    'page' => $actors->currentPage(),
-                    'limit' => $actors->perPage(),
-                    'total' => $actors->total(),
-                    'last_page' => $actors->lastPage(),
-                ],
+                'id' => $category->id,
+                'name' => $category->name,
+                'description' => $category->description,
+                'data' => $actors->items(),
+
             ];
         }
 
         return response()->json([
             'success' => true,
-            'categories' => $result,
+            'data' => $result,
+            'meta' => [
+                'page' => $actors->currentPage(),
+                'limit' => $actors->perPage(),
+                'total' => $actors->total(),
+                'last_page' => $actors->lastPage(),
+            ],
         ], 200);
     }
 
