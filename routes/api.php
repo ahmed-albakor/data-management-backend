@@ -14,10 +14,10 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
+Route::post('login', [AuthController::class, 'login']);
 
 Route::middleware([AdminMiddleware::class])->group(function () {
 
-    Route::post('login', [AuthController::class, 'login']);
 
 
     Route::get('/', [ActorController::class, 'index']);
