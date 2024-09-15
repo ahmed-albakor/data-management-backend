@@ -7,16 +7,8 @@ use App\Http\Controllers\ActorsCategoryController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Middleware\AdminMiddleware;
 
-Route::get('/user', function (Request $request) {
+Route::get('/', function (Request $request) {
     $request->headers->set('Accept', 'application/json');
-    // return $request->user() !== null ? "success" : "faluire";
-})->middleware('auth:sanctum');
-
-Route::post('login', [AuthController::class, 'login']);
-
-// حماية الروابط بواسطة `auth:sanctum` و `AdminMiddleware`
-Route::middleware([AdminMiddleware::class])->group(function () {
-
     // طرق خاصة بالمصادقة
     Route::post('changePassword', [AuthController::class, 'changePassword']);
     Route::post('logout', [AuthController::class, 'logout']);
@@ -36,4 +28,10 @@ Route::middleware([AdminMiddleware::class])->group(function () {
     Route::post('/categories', [ActorsCategoryController::class, 'create']);
     Route::post('/categories/{id}', [ActorsCategoryController::class, 'update']);
     Route::delete('/categories/{id}', [ActorsCategoryController::class, 'destroy']);
-});
+    // return $request->user() !== null ? "success" : "faluire";
+})->middleware('auth:sanctum');
+
+Route::post('login', [AuthController::class, 'login']);
+
+// حماية الروابط بواسطة `auth:sanctum` و `AdminMiddleware`
+Route::middleware([AdminMiddleware::class])->group(function () {});
