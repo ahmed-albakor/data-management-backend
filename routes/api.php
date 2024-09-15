@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ActorController;
 use App\Http\Controllers\ActorsCategoryController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Middleware\AdminMiddleware;
 
 Route::get('/user', function (Request $request) {
 
@@ -14,7 +15,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware([AdminMiddleware::class])->group(function () {
 
     Route::post('login', [AuthController::class, 'login']);
 
