@@ -92,7 +92,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'current_password' => 'required|string',
             'new_password' => 'required|string|min:6',
-            'logout_other_sessions' => 'required|boolean', // هذا الحقل لتحديد ما إذا كنت ترغب في إنهاء الجلسات السابقة أم لا
+            'logout_other_sessions' => 'required|boolean', 
         ]);
 
         if ($validator->fails()) {

@@ -15,12 +15,12 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::post('login', [AuthController::class, 'login']);
-Route::post('changePassword', [AuthController::class, 'changePassword']);
-Route::post('logout', [AuthController::class, 'logout']);
+
 
 Route::middleware([AdminMiddleware::class])->group(function () {
 
-
+    Route::post('changePassword', [AuthController::class, 'changePassword']);
+    Route::post('logout', [AuthController::class, 'logout']);
 
     Route::get('/', [ActorController::class, 'index']);
 
