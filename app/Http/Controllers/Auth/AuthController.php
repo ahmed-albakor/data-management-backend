@@ -154,7 +154,19 @@ class AuthController extends Controller
 
     public function logout()
     {
-        auth()->user()->tokens()->delete();
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'status' => 401,
+                'message' => 'User is not authenticated',
+            ], 401);
+        }
+
+        // حذف جميع الـ tokens الخاصة بالمستخدم المصادق
+        $user->tokens()->delete();
+
         return response()->json([
             'success' => true,
             'status' => 200,

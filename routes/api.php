@@ -16,13 +16,19 @@ Route::get('/user', function (Request $request) {
 
 Route::post('login', [AuthController::class, 'login']);
 
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('changePassword', [AuthController::class, 'changePassword']);
+    Route::post('logout', [AuthController::class, 'logout']);
+});
+
+
 
 Route::middleware([AdminMiddleware::class])->group(function () {
 
-    Route::post('changePassword', [AuthController::class, 'changePassword']);
-    Route::post('logout', [AuthController::class, 'logout']);
+    // Route::post('changePassword', [AuthController::class, 'changePassword']);
+    // Route::post('logout', [AuthController::class, 'logout']);
 
-    Route::get('/', [ActorController::class, 'index']);
+    Route::get('actors/', [ActorController::class, 'index']);
 
     Route::get('actors/categories', [ActorController::class, 'indexByCategories']);
 
