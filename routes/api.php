@@ -8,38 +8,28 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Middleware\AdminMiddleware;
 
 Route::get('/user', function (Request $request) {
-
-
-
     return $request->user();
 })->middleware('auth:sanctum');
 
 Route::post('login', [AuthController::class, 'login']);
 
-// Route::middleware('auth:sanctum')->group(function () {
-//     Route::post('changePassword', [AuthController::class, 'changePassword']);
-//     Route::post('logout', [AuthController::class, 'logout']);
-// });
-
-
-
+// حماية الروابط بواسطة `auth:sanctum` و `AdminMiddleware`
 Route::middleware(['auth:sanctum', AdminMiddleware::class])->group(function () {
 
+    // طرق خاصة بالمصادقة
     Route::post('changePassword', [AuthController::class, 'changePassword']);
     Route::post('logout', [AuthController::class, 'logout']);
 
+    // طرق خاصة بالممثلين
     Route::get('actors/', [ActorController::class, 'index']);
-
     Route::get('actors/categories', [ActorController::class, 'indexByCategories']);
-
     Route::get('actors/{id}', [ActorController::class, 'show']);
     Route::post('actors/', [ActorController::class, 'create']);
     Route::post('actors/{id}', [ActorController::class, 'update']);
     Route::delete('actors/{id}', [ActorController::class, 'destroy']);
     Route::delete('actors/{actor_id}/attachments', [ActorController::class, 'deleteAttachments']);
 
-
-
+    // طرق خاصة بالفئات
     Route::get('/categories', [ActorsCategoryController::class, 'index']);
     Route::get('/categories/{id}', [ActorsCategoryController::class, 'show']);
     Route::post('/categories', [ActorsCategoryController::class, 'create']);
