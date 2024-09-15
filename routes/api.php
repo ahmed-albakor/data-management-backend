@@ -8,33 +8,31 @@ use App\Http\Controllers\Auth\AuthController;
 
 Route::get('/user', function (Request $request) {
 
+    Route::post('login', [AuthController::class, 'login']);
 
+    Route::prefix('actors')->group(function () {
+
+        Route::get('/', [ActorController::class, 'index']);
+
+        Route::get('/categories', [ActorController::class, 'indexByCategories']);
+
+        Route::get('/{id}', [ActorController::class, 'show']);
+
+        Route::post('/', [ActorController::class, 'create']);
+
+        Route::post('/{id}', [ActorController::class, 'update']);
+
+        Route::delete('/{id}', [ActorController::class, 'destroy']);
+
+        Route::delete('/{actor_id}/attachments', [ActorController::class, 'deleteAttachments']);
+    });
+
+
+    Route::get('/categories', [ActorsCategoryController::class, 'index']);
+    Route::get('/categories/{id}', [ActorsCategoryController::class, 'show']);
+    Route::post('/categories', [ActorsCategoryController::class, 'create']);
+    Route::post('/categories/{id}', [ActorsCategoryController::class, 'update']);
+    Route::delete('/categories/{id}', [ActorsCategoryController::class, 'destroy']);
 
     return $request->user();
 })->middleware('auth:sanctum');
-
-Route::post('login', [AuthController::class, 'login']);
-
-Route::prefix('actors')->group(function () {
-
-    Route::get('/', [ActorController::class, 'index']);
-
-    Route::get('/categories', [ActorController::class, 'indexByCategories']);
-
-    Route::get('/{id}', [ActorController::class, 'show']);
-
-    Route::post('/', [ActorController::class, 'create']);
-
-    Route::post('/{id}', [ActorController::class, 'update']);
-
-    Route::delete('/{id}', [ActorController::class, 'destroy']);
-
-    Route::delete('/{actor_id}/attachments', [ActorController::class, 'deleteAttachments']);
-});
-
-
-Route::get('/categories', [ActorsCategoryController::class, 'index']);
-Route::get('/categories/{id}', [ActorsCategoryController::class, 'show']);
-Route::post('/categories', [ActorsCategoryController::class, 'create']);
-Route::post('/categories/{id}', [ActorsCategoryController::class, 'update']);
-Route::delete('/categories/{id}', [ActorsCategoryController::class, 'destroy']);
