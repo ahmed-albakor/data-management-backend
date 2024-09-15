@@ -9,7 +9,7 @@ use App\Http\Middleware\AdminMiddleware;
 
 Route::get('/user', function (Request $request) {
     $request->headers->set('Accept', 'application/json');
-    return $request->user() !== null ? "success" : "faluire";
+    // return $request->user() !== null ? "success" : "faluire";
 })->middleware('auth:sanctum');
 
 Route::post('login', [AuthController::class, 'login']);
