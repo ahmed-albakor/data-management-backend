@@ -89,10 +89,21 @@ class AuthController extends Controller
 
     public function changePassword(Request $request)
     {
+        $user = auth()->user();
+
+        // تحقق مما إذا كان المستخدم مسجل الدخول
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'status' => 401,
+                'message' => 'User is not authenticated',
+            ], 401);
+        }
+
         $validator = Validator::make($request->all(), [
             'current_password' => 'required|string',
             'new_password' => 'required|string|min:6',
-            'logout_other_sessions' => 'required|boolean', 
+            'logout_other_sessions' => 'required|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -103,8 +114,6 @@ class AuthController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
-
-        $user = auth()->user();
 
         // التحقق من كلمة المرور الحالية
         if (!Hash::check($request->current_password, $user->password)) {
@@ -140,6 +149,7 @@ class AuthController extends Controller
             'message' => 'Password changed successfully',
         ], 200);
     }
+
 
 
     public function logout()
