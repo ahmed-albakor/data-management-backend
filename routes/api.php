@@ -8,24 +8,27 @@ use App\Http\Controllers\Auth\AuthController;
 
 Route::get('/user', function (Request $request) {
 
+
+
+    return $request->user();
+})->middleware('auth:sanctum');
+
+
+Route::middleware('auth:sanctum')->group(function () {
+
     Route::post('login', [AuthController::class, 'login']);
 
-    Route::prefix('actors')->group(function () {
 
-        Route::get('/', [ActorController::class, 'index']);
+    Route::get('/', [ActorController::class, 'index']);
 
-        Route::get('/categories', [ActorController::class, 'indexByCategories']);
+    Route::get('actors/categories', [ActorController::class, 'indexByCategories']);
 
-        Route::get('/{id}', [ActorController::class, 'show']);
+    Route::get('actors/{id}', [ActorController::class, 'show']);
+    Route::post('actors/', [ActorController::class, 'create']);
+    Route::post('actors/{id}', [ActorController::class, 'update']);
+    Route::delete('actors/{id}', [ActorController::class, 'destroy']);
+    Route::delete('actors/{actor_id}/attachments', [ActorController::class, 'deleteAttachments']);
 
-        Route::post('/', [ActorController::class, 'create']);
-
-        Route::post('/{id}', [ActorController::class, 'update']);
-
-        Route::delete('/{id}', [ActorController::class, 'destroy']);
-
-        Route::delete('/{actor_id}/attachments', [ActorController::class, 'deleteAttachments']);
-    });
 
 
     Route::get('/categories', [ActorsCategoryController::class, 'index']);
@@ -33,6 +36,4 @@ Route::get('/user', function (Request $request) {
     Route::post('/categories', [ActorsCategoryController::class, 'create']);
     Route::post('/categories/{id}', [ActorsCategoryController::class, 'update']);
     Route::delete('/categories/{id}', [ActorsCategoryController::class, 'destroy']);
-
-    return $request->user();
-})->middleware('auth:sanctum');
+});
