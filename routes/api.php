@@ -15,7 +15,7 @@ Route::get('/user', function (Request $request) {
 Route::post('login', [AuthController::class, 'login']);
 
 // حماية الروابط بواسطة `auth:sanctum` و `AdminMiddleware`
-Route::middleware([AdminMiddleware::class, 'auth:sanctum'])->group(function () {
+Route::middleware([AdminMiddleware::class])->group(function () {
 
     // طرق خاصة بالمصادقة
     Route::post('changePassword', [AuthController::class, 'changePassword']);
