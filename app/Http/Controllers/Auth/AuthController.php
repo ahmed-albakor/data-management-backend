@@ -86,6 +86,62 @@ class AuthController extends Controller
         ], 200);
     }
 
+
+    public function changePassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:6|confirmed',
+            'logout_other_sessions' => 'required|boolean', // هذا الحقل لتحديد ما إذا كنت ترغب في إنهاء الجلسات السابقة أم لا
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'status' => 422,
+                'message' => 'Validation Errors',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $user = auth()->user();
+
+        // التحقق من كلمة المرور الحالية
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'status' => 401,
+                'message' => 'Current password is incorrect',
+            ], 401);
+        }
+
+        // تحديث كلمة المرور
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        // تحقق إذا كان المستخدم يريد إنهاء جميع الجلسات الأخرى
+        if ($request->logout_other_sessions) {
+            // حذف جميع التوكنات الحالية وإنشاء توكن جديد
+            $user->tokens()->delete();
+            $newToken = $user->createToken($user->name . '-AuthToken')->plainTextToken;
+
+            return response()->json([
+                'success' => true,
+                'status' => 200,
+                'message' => 'Password changed and other sessions logged out',
+                'access_token' => $newToken, // إرجاع التوكن الجديد
+            ], 200);
+        }
+
+        // إذا اختار المستخدم عدم إنهاء الجلسات الأخرى
+        return response()->json([
+            'success' => true,
+            'status' => 200,
+            'message' => 'Password changed successfully',
+        ], 200);
+    }
+
+
     public function logout()
     {
         auth()->user()->tokens()->delete();
